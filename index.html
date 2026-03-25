@@ -412,14 +412,18 @@ async function loadAllData(){
     ];
     scores   = scr ? Object.values(scr) : [];
     payments = pay ? Object.values(pay) : [];
-    // Save defaults if first time
     if(!cls) await persist();
     dataLoaded = true;
+    hideLoading();
+    try { renderDashboard(); } catch(re){ console.error('renderDashboard error:',re); }
   } catch(e){
-    alert('Failed to load data: '+e.message+'. Check your internet connection.');
+    hideLoading();
+    document.getElementById('loading-overlay').style.display='none';
+    document.body.insertAdjacentHTML('afterbegin',`<div style="position:fixed;top:0;left:0;right:0;background:#ea5455;color:#fff;padding:16px;z-index:9999;font-family:sans-serif;font-size:14px">
+      ❌ Firebase Error: ${e.message} — Please check your internet connection and try refreshing.
+    </div>`);
+    console.error('Firebase load error:', e);
   }
-  hideLoading();
-  renderDashboard();
 }
 
 // ═══════════════════════════════════════════════════════════════
