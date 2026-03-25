@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NPM EDU — Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg-card:#161b27;--bg-input:#1c2236;--bg-hover:#1f2640;
+  --border:#252d45;--border-light:#2e3a5a;
+  --accent:#4a90e8;--accent-soft:rgba(74,144,232,0.12);--accent-glow:rgba(74,144,232,0.25);
+  --success:#28c76f;--success-soft:rgba(40,199,111,0.1);
+  --danger:#ea5455;--danger-soft:rgba(234,84,85,0.1);
+  --warning:#ff9f43;--warning-soft:rgba(255,159,67,0.1);
+  --text:#dde3f5;--text-muted:#7a86b0;--text-dim:#3d4a6b;
+  --radius:10px;--radius-lg:14px;--radius-xl:18px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;display:flex}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── Sidebar ── */
+#sidebar{width:220px;min-width:220px;background:var(--bg-card);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 10px;gap:3px;overflow-y:auto}
+.brand{padding:6px 12px 18px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--accent);letter-spacing:-0.5px}
+.brand-sub{font-size:11px;color:var(--text-dim);margin-top:2px}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);background:transparent;color:var(--text-muted);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;text-align:left;width:100%;transition:all 0.15s}
+.nav-btn:hover{background:var(--bg-hover);color:var(--text)}
+.nav-btn.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav-icon{font-size:15px;width:18px;text-align:center}
+
+/* ── Main ── */
+#main{flex:1;overflow-y:auto;padding:28px 30px;display:flex;flex-direction:column;gap:0}
+.page{display:none;flex-direction:column;gap:20px}
+.page.active{display:flex}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:22px;color:var(--text);letter-spacing:-0.3px}
+.page-sub{font-size:12px;color:var(--text-muted);margin-top:3px}
+
+/* ── Cards ── */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px}
+.card-title{font-family:'Syne',sans-serif;font-weight:600;font-size:14px;margin-bottom:14px;color:var(--text)}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;transition:all 0.15s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-ghost{background:transparent;color:var(--text-muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg-hover);color:var(--text)}
+.btn-danger{background:var(--danger-soft);color:var(--danger);border:1px solid var(--danger)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-icon{padding:5px 8px;font-size:14px;background:transparent;color:var(--text-dim);border:none;cursor:pointer;border-radius:6px;transition:all 0.15s}
+.btn-icon:hover{color:var(--danger);background:var(--danger-soft)}
+
+/* ── Form ── */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;color:var(--text-muted);font-weight:600;letter-spacing:0.4px;text-transform:uppercase}
+input,select,textarea{background:var(--bg-input);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;width:100%;outline:none;transition:border 0.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:var(--bg-card)}
+input[type=checkbox]{width:auto;cursor:pointer}
+
+/* ── Grid ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.col-span-2{grid-column:1/-1}
+
+/* ── Stats ── */
+.stat-card{background:var(--bg-input);border-radius:var(--radius-lg);padding:16px 18px}
+.stat-label{font-size:11px;color:var(--text-muted);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:6px}
+.stat-value{font-family:'Syne',sans-serif;font-size:28px;font-weight:700}
+
+/* ── Badge ── */
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:0.3px}
+.badge-accent{background:var(--accent-soft);color:var(--accent)}
+.badge-success{background:var(--success-soft);color:var(--success)}
+.badge-danger{background:var(--danger-soft);color:var(--danger)}
+.badge-warning{background:var(--warning-soft);color:var(--warning)}
+.badge-muted{background:var(--bg-input);color:var(--text-muted)}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;border-radius:var(--radius-lg);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:var(--bg-input)}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:0.4px;text-transform:uppercase;white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:var(--bg-hover)}
+.td-center{text-align:center}
+.td-actions{display:flex;gap:5px;align-items:center}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)}
+.modal{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-xl);width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 80px rgba(0,0,0,0.6)}
+.modal-sm{max-width:440px}
+.modal-md{max-width:560px}
+.modal-lg{max-width:740px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-card);z-index:1}
+.modal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px}
+.modal-close{background:transparent;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:0 4px;line-height:1;transition:color 0.15s}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:22px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;padding:16px 22px;border-top:1px solid var(--border)}
+
+/* ── Filters row ── */
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input{width:auto;min-width:150px}
+
+/* ── Payment grid ── */
+.pay-grid{overflow-x:auto}
+.pay-table{width:100%;border-collapse:collapse;font-size:13px}
+.pay-table th{background:var(--bg-input);padding:9px 12px;font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;border:1px solid var(--border);text-align:center;white-space:nowrap}
+.pay-table th.student-col{text-align:left;min-width:160px}
+.pay-table td{border:1px solid var(--border);padding:8px 10px;text-align:center;vertical-align:middle}
+.pay-table td.student-name{text-align:left;font-weight:500;padding:8px 12px}
+.pay-table tr:nth-child(even) td{background:rgba(255,255,255,0.01)}
+
+/* ── Checkbox tick ── */
+.tick-wrap{display:flex;align-items:center;justify-content:center}
+.tick-box{width:28px;height:28px;border-radius:7px;border:2px solid var(--border-light);background:var(--bg-input);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;flex-shrink:0}
+.tick-box:hover{border-color:var(--accent)}
+.tick-box.paid{background:var(--success);border-color:var(--success)}
+.tick-box.paid::after{content:'✓';color:#fff;font-size:14px;font-weight:700;line-height:1}
+
+/* ── Enrollment tags ── */
+.enroll-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.enroll-tag{padding:4px 11px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;border:1px solid var(--border);background:var(--bg-input);color:var(--text-muted)}
+.enroll-tag.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+
+/* ── Scores ── */
+.score-good{color:var(--success);font-weight:600}
+.score-mid{color:var(--warning);font-weight:600}
+.score-low{color:var(--danger);font-weight:600}
+.score-none{color:var(--text-dim)}
+
+/* ── Misc ── */
+.sep{border:none;border-top:1px solid var(--border);margin:16px 0}
+.empty{color:var(--text-dim);text-align:center;padding:32px;font-size:13px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.search-bar{max-width:280px}
+.inline-row{display:flex;gap:10px;align-items:flex-end}
+.tag-section-label{font-size:11px;color:var(--text-muted);font-weight:600;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:6px;margin-top:12px}
+</style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" style="position:fixed;inset:0;background:rgba(13,17,23,0.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+  <div style="width:40px;height:40px;border:3px solid #252d45;border-top-color:#4a90e8;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+  <div id="loading-msg" style="color:#7a86b0;font-size:14px;font-family:'DM Sans',sans-serif">Connecting to database…</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside id="sidebar">
+  <div class="brand">
+    <div class="brand-name">NPM EDU</div>
+    <div class="brand-sub">Management System</div>
+  </div>
+  <button class="nav-btn active" onclick="showPage('dashboard')" id="nav-dashboard"><span class="nav-icon">⊞</span> Dashboard</button>
+  <button class="nav-btn" onclick="showPage('students')" id="nav-students"><span class="nav-icon">👤</span> Students</button>
+  <button class="nav-btn" onclick="showPage('classes')" id="nav-classes"><span class="nav-icon">🏫</span> Classes</button>
+  <button class="nav-btn" onclick="showPage('subjects')" id="nav-subjects"><span class="nav-icon">📚</span> Subjects</button>
+  <button class="nav-btn" onclick="showPage('scores')" id="nav-scores"><span class="nav-icon">📝</span> Test Scores</button>
+  <button class="nav-btn" onclick="showPage('payments')" id="nav-payments"><span class="nav-icon">💰</span> Payments</button>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main id="main">
+
+  <!-- ── DASHBOARD ── -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Dashboard</div>
+        <div class="page-sub">Welcome to NPM EDU Management System</div>
+      </div>
+    </div>
+    <div class="grid-4" id="dash-stats"></div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">2025 — Payment Overview</div>
+        <div id="dash-pay-overview"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recently Added Students</div>
+        <div id="dash-recent"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── STUDENTS ── -->
+  <section class="page" id="page-students">
+    <div class="page-header">
+      <div>
+        <div class="page-title">Students</div>
+        <div class="page-sub" id="students-count">0 registered students</div>
+      </div>
+      <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
+    </div>
+    <input class="search-bar" id="student-search" placeholder="Search by name or NIC…" oninput="renderStudentsTable()"/>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Name</th><th>OL Year</th><th>Phone</th><th>NIC</th><th>Enrolled</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="students-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── CLASSES ── -->
+  <section class="page" id="page-classes">
+    <div class="page-header">
+      <div><div class="page-title">Classes</div><div class="page-sub">Manage your class groups</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Add New Class</div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:480px">
+        <div class="inline-row">
+          <input id="new-class-input" placeholder="e.g. Grade 8 Walasmulla" onkeydown="if(event.key==='Enter')addClass()"/>
+          <button class="btn btn-primary" onclick="addClass()">Add Class</button>
+        </div>
+        <div class="field">
+          <label>Note (optional — only visible when editing)</label>
+          <input id="new-class-note" placeholder="e.g. Held every Saturday 2pm at Walasmulla branch"/>
+        </div>
+      </div>
+    </div>
+    <div id="classes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px"></div>
+  </section>
+
+  <!-- ── SUBJECTS ── -->
+  <section class="page" id="page-subjects">
+    <div class="page-header">
+      <div><div class="page-title">Subjects</div><div class="page-sub">Manage subjects offered</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Add New Subject</div>
+      <div class="inline-row">
+        <input id="new-subject-input" placeholder="e.g. Science Paper EM" style="max-width:320px" onkeydown="if(event.key==='Enter')addSubject()"/>
+        <button class="btn btn-primary" onclick="addSubject()">Add Subject</button>
+      </div>
+    </div>
+    <div id="subjects-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px"></div>
+  </section>
+
+  <!-- ── TEST SCORES ── -->
+  <section class="page" id="page-scores">
+    <div class="page-header">
+      <div><div class="page-title">Test Scores</div><div class="page-sub">Monthly test results</div></div>
+      <button class="btn btn-primary" onclick="openScoreModal()">+ Enter Scores</button>
+    </div>
+    <div class="filters">
+      <select id="score-filter-class" onchange="renderScoresTable()"><option value="all">All Classes</option></select>
+      <select id="score-filter-subject" onchange="renderScoresTable()"><option value="all">All Subjects</option></select>
+      <input type="month" id="score-filter-month" onchange="renderScoresTable()" style="width:auto"/>
+    </div>
+    <div class="table-wrap">
+      <table><thead id="scores-thead"></thead><tbody id="scores-tbody"></tbody></table>
+    </div>
+  </section>
+
+  <!-- ── PAYMENTS ── -->
+  <section class="page" id="page-payments">
+    <div class="page-header">
+      <div><div class="page-title">Payments</div><div class="page-sub">Track monthly payments per student</div></div>
+    </div>
+    <div class="filters" style="margin-bottom:4px">
+      <select id="pay-filter-class" onchange="renderPaymentTable()"><option value="">— Select Class —</option></select>
+      <select id="pay-filter-subject" onchange="renderPaymentTable()"><option value="">— Select Subject —</option></select>
+    </div>
+    <div id="pay-summary" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:4px"></div>
+    <div class="pay-grid">
+      <table class="pay-table" id="pay-table">
+        <thead id="pay-thead"></thead>
+        <tbody id="pay-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══ STUDENT MODAL ═══ -->
+<div class="modal-overlay" id="student-modal" style="display:none" onclick="if(event.target===this)closeStudentModal()">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title" id="student-modal-title">Add New Student</span>
+      <button class="modal-close" onclick="closeStudentModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="field"><label>Full Name *</label><input id="f-name" placeholder="Student full name"/></div>
+        <div class="field"><label>OL Year</label><input id="f-ol" type="number" value="2026"/></div>
+        <div class="field"><label>Phone Number</label><input id="f-phone" placeholder="07X XXX XXXX"/></div>
+        <div class="field"><label>NIC</label><input id="f-nic" placeholder="XXXXXXXXV or XXXXXXXXXX"/></div>
+        <div class="field"><label>Guardian Name</label><input id="f-guardian"/></div>
+        <div class="field"><label>Guardian Phone</label><input id="f-gphone"/></div>
+        <div class="field col-span-2"><label>Home Address</label><textarea id="f-address" rows="2"></textarea></div>
+      </div>
+      <hr class="sep"/>
+      <div class="card-title" style="margin-bottom:10px">Enrollments — select class &amp; subject combinations</div>
+      <div id="enrollment-picker"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeStudentModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCORE MODAL ═══ -->
+<div class="modal-overlay" id="score-modal" style="display:none" onclick="if(event.target===this)closeScoreModal()">
+  <div class="modal modal-md">
+    <div class="modal-header">
+      <span class="modal-title">Enter Test Scores</span>
+      <button class="modal-close" onclick="closeScoreModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2" style="margin-bottom:14px">
+        <div class="field"><label>Class</label><select id="sm-class" onchange="refreshScoreModal()"><option value="all">All Classes</option></select></div>
+        <div class="field"><label>Subject *</label><select id="sm-subject" onchange="refreshScoreModal()"></select></div>
+        <div class="field col-span-2"><label>Month</label><input type="month" id="sm-month" onchange="refreshScoreModal()"/></div>
+      </div>
+      <div id="sm-rows" style="max-height:340px;overflow-y:auto"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeScoreModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveScores()">Save Scores</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ═══════════════════════════════════════════════════════════════
+// FIREBASE REST API — No SDK needed, works everywhere
+// ═══════════════════════════════════════════════════════════════
+const DB_URL = "https://npm-edu-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+async function fbGet(path){
+  const r = await fetch(`${DB_URL}/${path}.json`);
+  if(!r.ok) throw new Error('Read failed: '+r.status);
+  return await r.json();
+}
+async function fbSet(path, value){
+  const r = await fetch(`${DB_URL}/${path}.json`, {
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(value)
+  });
+  if(!r.ok) throw new Error('Write failed: '+r.status);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATA STORE
+// ═══════════════════════════════════════════════════════════════
+const MONTHS_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const YEAR = 2025;
+
+function uid(){return Math.random().toString(36).slice(2,10);}
+
+let students = [];
+let classes  = [];
+let subjects = [];
+let scores   = [];
+let payments = [];
+let dataLoaded = false;
+
+// Show loading overlay
+function showLoading(msg){
+  document.getElementById('loading-overlay').style.display='flex';
+  document.getElementById('loading-msg').textContent=msg||'Loading…';
+}
+function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
+
+async function persist(){
+  try {
+    await fbSet('students', students.length ? Object.fromEntries(students.map(s=>[s.id,s])) : {});
+    await fbSet('classes',  classes.length  ? Object.fromEntries(classes.map(c=>[c.id,c]))  : {});
+    await fbSet('subjects', subjects.length ? Object.fromEntries(subjects.map(s=>[s.id,s])) : {});
+    await fbSet('scores',   scores.length   ? Object.fromEntries(scores.map(s=>[s.id,s]))   : {});
+    await fbSet('payments', payments.length ? Object.fromEntries(payments.map(p=>[p.id,p])) : {});
+  } catch(e){ alert('Save error: '+e.message); }
+}
+
+async function loadAllData(){
+  showLoading('Connecting to database…');
+  try {
+    const [stu,cls,sub,scr,pay] = await Promise.all([
+      fbGet('students'), fbGet('classes'), fbGet('subjects'), fbGet('scores'), fbGet('payments')
+    ]);
+    students = stu ? Object.values(stu) : [];
+    classes  = cls ? Object.values(cls) : [
+      {id:uid(),name:'Grade 6 Walasmulla',note:''},
+      {id:uid(),name:'Grade 6 Neluwa',note:''},
+      {id:uid(),name:'Grade 7 Walasmulla',note:''},
+    ];
+    subjects = sub ? Object.values(sub) : [
+      {id:uid(),name:'Science SM'},
+      {id:uid(),name:'Science EM'},
+      {id:uid(),name:'Maths + Science EM'},
+      {id:uid(),name:'Science Paper SM'},
+    ];
+    scores   = scr ? Object.values(scr) : [];
+    payments = pay ? Object.values(pay) : [];
+    if(!cls) await persist();
+    dataLoaded = true;
+    hideLoading();
+    try { renderDashboard(); } catch(re){ console.error('renderDashboard error:',re); }
+  } catch(e){
+    hideLoading();
+    document.getElementById('loading-overlay').style.display='none';
+    document.body.insertAdjacentHTML('afterbegin',`<div style="position:fixed;top:0;left:0;right:0;background:#ea5455;color:#fff;padding:16px;z-index:9999;font-family:sans-serif;font-size:14px">
+      ❌ Firebase Error: ${e.message} — Please check your internet connection and try refreshing.
+    </div>`);
+    console.error('Firebase load error:', e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+let currentPage = 'dashboard';
+function showPage(p){
+  document.getElementById('page-'+currentPage).classList.remove('active');
+  document.getElementById('nav-'+currentPage).classList.remove('active');
+  currentPage=p;
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p).classList.add('active');
+  renderPage(p);
+}
+function renderPage(p){
+  if(!dataLoaded) return;
+  if(p==='dashboard') renderDashboard();
+  if(p==='students') renderStudentsTable();
+  if(p==='classes') renderClasses();
+  if(p==='subjects') renderSubjects();
+  if(p==='scores'){populateScoreFilters();renderScoresTable();}
+  if(p==='payments'){populatePayFilters();renderPaymentTable();}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function renderDashboard(){
+  const totalEnroll = students.reduce((s,st)=>s+(st.enrollments||[]).length,0);
+  const statsEl = document.getElementById('dash-stats');
+  statsEl.innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Students</div><div class="stat-value" style="color:var(--accent)">${students.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Classes</div><div class="stat-value" style="color:#a78bfa">${classes.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Subjects</div><div class="stat-value" style="color:var(--success)">${subjects.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Enrollments</div><div class="stat-value" style="color:var(--warning)">${totalEnroll}</div></div>
+  `;
+
+  // Payment overview by month
+  const payEl = document.getElementById('dash-pay-overview');
+  const now = new Date().getMonth()+1;
+  let html = '<div style="display:flex;flex-direction:column;gap:7px">';
+  for(let m=1;m<=12;m++){
+    const paidCount = payments.filter(p=>p.month===m&&p.year===YEAR&&p.paid).length;
+    const totalSlots = students.reduce((cnt,s)=>{
+      const subIds = [...new Set((s.enrollments||[]).map(e=>e.subjectId))];
+      return cnt+subIds.length;
+    },0);
+    const pct = totalSlots>0?Math.round(paidCount/totalSlots*100):0;
+    const isCurrent = m===now;
+    html+=`<div style="display:flex;align-items:center;gap:10px">
+      <span style="width:36px;font-size:11px;color:${isCurrent?'var(--accent)':'var(--text-muted)'};font-weight:${isCurrent?700:400}">${MONTHS_FULL[m-1].slice(0,3)}</span>
+      <div style="flex:1;height:6px;background:var(--bg-input);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${pct>=80?'var(--success)':pct>=40?'var(--warning)':'var(--danger)'};border-radius:3px;transition:width 0.3s"></div>
+      </div>
+      <span style="font-size:11px;color:var(--text-muted);width:30px;text-align:right">${paidCount}</span>
+    </div>`;
+  }
+  html+='</div>';
+  payEl.innerHTML = html;
+
+  // Recent students
+  const rec = [...students].slice(-6).reverse();
+  const recEl = document.getElementById('dash-recent');
+  if(!rec.length){recEl.innerHTML='<p class="empty">No students yet.</p>';return;}
+  recEl.innerHTML = rec.map(s=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div class="avatar">${(s.name||'?').charAt(0).toUpperCase()}</div>
+      <div><div style="font-weight:500;font-size:13px">${s.name}</div>
+      <div style="font-size:11px;color:var(--text-dim)">OL ${s.olYear||'—'} · ${(s.enrollments||[]).length} enrollments</div></div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STUDENTS
+// ═══════════════════════════════════════════════════════════════
+let editingStudentId = null;
+
+function renderStudentsTable(){
+  const q=(document.getElementById('student-search').value||'').toLowerCase();
+  const filtered=students.filter(s=>
+    (s.name||'').toLowerCase().includes(q)||(s.nic||'').toLowerCase().includes(q)
+  );
+  document.getElementById('students-count').textContent=`${students.length} registered students`;
+  const tb=document.getElementById('students-tbody');
+  if(!filtered.length){tb.innerHTML=`<tr><td colspan="6" class="empty">No students found.</td></tr>`;return;}
+  tb.innerHTML=filtered.map(s=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:9px">
+        <div class="avatar">${(s.name||'?').charAt(0).toUpperCase()}</div>
+        <span style="font-weight:500">${s.name||'—'}</span>
+      </div></td>
+      <td style="color:var(--text-muted)">${s.olYear||'—'}</td>
+      <td style="color:var(--text-muted)">${s.phone||'—'}</td>
+      <td style="color:var(--text-muted)">${s.nic||'—'}</td>
+      <td><span class="badge badge-accent">${(s.enrollments||[]).length} subjects</span></td>
+      <td><div class="td-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openStudentModal('${s.id}')">Edit</button>
+        <button class="btn-icon" onclick="deleteStudent('${s.id}')">✕</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+async async function deleteStudent(id){
+  if(!confirm('Delete this student?'))return;
+  students=students.filter(s=>s.id!==id);showLoading('Saving…');await persist();hideLoading();renderStudentsTable();
+}
+
+function openStudentModal(id){
+  editingStudentId=id||null;
+  const s=id?students.find(x=>x.id===id):null;
+  document.getElementById('student-modal-title').textContent=s?'Edit Student':'Add New Student';
+  document.getElementById('f-name').value=s?.name||'';
+  document.getElementById('f-ol').value=s?.olYear||2026;
+  document.getElementById('f-phone').value=s?.phone||'';
+  document.getElementById('f-nic').value=s?.nic||'';
+  document.getElementById('f-guardian').value=s?.guardian||'';
+  document.getElementById('f-gphone').value=s?.guardianPhone||'';
+  document.getElementById('f-address').value=s?.address||'';
+  renderEnrollmentPicker(s?.enrollments||[]);
+  document.getElementById('student-modal').style.display='flex';
+}
+
+function closeStudentModal(){document.getElementById('student-modal').style.display='none';}
+
+function renderEnrollmentPicker(enrollments){
+  const el=document.getElementById('enrollment-picker');
+  if(!classes.length){el.innerHTML='<p style="color:var(--text-dim);font-size:13px">No classes added yet. Add classes first.</p>';return;}
+  el.innerHTML=classes.map(cls=>`
+    <div style="margin-bottom:14px">
+      <div class="tag-section-label">${cls.name}</div>
+      <div class="enroll-tags">${subjects.map(sub=>{
+        const active=enrollments.some(e=>e.classId===cls.id&&e.subjectId===sub.id);
+        return `<span class="enroll-tag${active?' active':''}" 
+          onclick="toggleEnroll(this,'${cls.id}','${sub.id}')">${sub.name}</span>`;
+      }).join('')}</div>
+    </div>`).join('');
+}
+
+function toggleEnroll(el,classId,subjectId){el.classList.toggle('active');}
+
+function getEnrollmentsFromPicker(){
+  const tags=document.querySelectorAll('#enrollment-picker .enroll-tag.active');
+  return Array.from(tags).map(t=>{
+    const onclick=t.getAttribute('onclick');
+    const parts=onclick.match(/'([^']+)'/g).map(s=>s.replace(/'/g,''));
+    return{classId:parts[0],subjectId:parts[1]};
+  });
+}
+
+async function saveStudent(){
+  const name=document.getElementById('f-name').value.trim();
+  if(!name){alert('Name is required.');return;}
+  const data={
+    name,olYear:document.getElementById('f-ol').value,
+    phone:document.getElementById('f-phone').value.trim(),
+    nic:document.getElementById('f-nic').value.trim(),
+    guardian:document.getElementById('f-guardian').value.trim(),
+    guardianPhone:document.getElementById('f-gphone').value.trim(),
+    address:document.getElementById('f-address').value.trim(),
+    enrollments:getEnrollmentsFromPicker(),
+  };
+  if(editingStudentId){
+    students=students.map(s=>s.id===editingStudentId?{...s,...data}:s);
+  } else {
+    students.push({id:uid(),...data});
+  }
+  showLoading('Saving…');await persist();hideLoading();closeStudentModal();renderStudentsTable();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLASSES
+// ═══════════════════════════════════════════════════════════════
+async function addClass(){
+  const el=document.getElementById('new-class-input');
+  const noteEl=document.getElementById('new-class-note');
+  const name=el.value.trim();if(!name)return;
+  const note=noteEl.value.trim();
+  classes.push({id:uid(),name,note});showLoading('Saving…');await persist();hideLoading();el.value='';noteEl.value='';renderClasses();
+}
+async function deleteClass(id){
+  if(!confirm('Delete this class?'))return;
+  classes=classes.filter(c=>c.id!==id);showLoading('Saving…');await persist();hideLoading();renderClasses();
+}
+function startEditClass(id){
+  // save any other open edits first
+  document.querySelectorAll('.class-edit-row').forEach(r=>r.style.display='none');
+  document.querySelectorAll('.class-view-row').forEach(r=>r.style.display='flex');
+  const c=classes.find(x=>x.id===id);
+  document.getElementById('class-edit-name-'+id).value=c.name;
+  document.getElementById('class-edit-note-'+id).value=c.note||'';
+  document.getElementById('class-view-'+id).style.display='none';
+  document.getElementById('class-edit-'+id).style.display='flex';
+  document.getElementById('class-edit-name-'+id).focus();
+}
+function cancelEditClass(id){
+  document.getElementById('class-view-'+id).style.display='flex';
+  document.getElementById('class-edit-'+id).style.display='none';
+}
+async function saveEditClass(id){
+  const name=document.getElementById('class-edit-name-'+id).value.trim();
+  const note=document.getElementById('class-edit-note-'+id).value.trim();
+  if(!name){alert('Class name cannot be empty.');return;}
+  classes=classes.map(c=>c.id===id?{...c,name,note}:c);
+  showLoading('Saving…');await persist();hideLoading();renderClasses();
+}
+function getClassStudentCount(id){return students.filter(s=>(s.enrollments||[]).some(e=>e.classId===id)).length;}
+function renderClasses(){
+  const el=document.getElementById('classes-grid');
+  if(!classes.length){el.innerHTML='<p class="empty">No classes added yet.</p>';return;}
+  el.innerHTML=classes.map(c=>`
+    <div class="card" style="padding:16px 18px">
+      <div id="class-view-${c.id}" class="class-view-row" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+          <span class="badge badge-accent">${getClassStudentCount(c.id)} students</span>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="btn btn-ghost btn-sm" onclick="startEditClass('${c.id}')">✏ Edit</button>
+          <button class="btn-icon" onclick="deleteClass('${c.id}')">✕</button>
+        </div>
+      </div>
+      <div id="class-edit-${c.id}" class="class-edit-row" style="display:none;flex-direction:column;gap:8px">
+        <div class="field"><label>Class Name</label><input id="class-edit-name-${c.id}" onkeydown="if(event.key==='Enter')saveEditClass('${c.id}');if(event.key==='Escape')cancelEditClass('${c.id}')"/></div>
+        <div class="field"><label>Note (private)</label><textarea id="class-edit-note-${c.id}" rows="2" placeholder="e.g. Held every Saturday at 2pm…"></textarea></div>
+        <div style="display:flex;gap:7px;justify-content:flex-end;margin-top:2px">
+          <button class="btn btn-ghost btn-sm" onclick="cancelEditClass('${c.id}')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="saveEditClass('${c.id}')">Save</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUBJECTS
+// ═══════════════════════════════════════════════════════════════
+async function addSubject(){
+  const el=document.getElementById('new-subject-input');
+  const name=el.value.trim();if(!name)return;
+  subjects.push({id:uid(),name});showLoading('Saving…');await persist();hideLoading();el.value='';renderSubjects();
+}
+async function deleteSubject(id){
+  if(!confirm('Delete this subject?'))return;
+  subjects=subjects.filter(s=>s.id!==id);showLoading('Saving…');await persist();hideLoading();renderSubjects();
+}
+function startEditSubject(id){
+  document.querySelectorAll('.subj-edit-row').forEach(r=>r.style.display='none');
+  document.querySelectorAll('.subj-view-row').forEach(r=>r.style.display='flex');
+  const s=subjects.find(x=>x.id===id);
+  document.getElementById('subj-edit-name-'+id).value=s.name;
+  document.getElementById('subj-view-'+id).style.display='none';
+  document.getElementById('subj-edit-'+id).style.display='flex';
+  document.getElementById('subj-edit-name-'+id).focus();
+}
+function cancelEditSubject(id){
+  document.getElementById('subj-view-'+id).style.display='flex';
+  document.getElementById('subj-edit-'+id).style.display='none';
+}
+async function saveEditSubject(id){
+  const name=document.getElementById('subj-edit-name-'+id).value.trim();
+  if(!name){alert('Subject name cannot be empty.');return;}
+  subjects=subjects.map(s=>s.id===id?{...s,name}:s);
+  showLoading('Saving…');await persist();hideLoading();renderSubjects();
+}
+function getSubjectStudentCount(id){return students.filter(s=>(s.enrollments||[]).some(e=>e.subjectId===id)).length;}
+function renderSubjects(){
+  const el=document.getElementById('subjects-grid');
+  if(!subjects.length){el.innerHTML='<p class="empty">No subjects added yet.</p>';return;}
+  el.innerHTML=subjects.map(s=>`
+    <div class="card" style="padding:16px 18px">
+      <div id="subj-view-${s.id}" class="subj-view-row" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</div>
+          <span class="badge badge-muted">${getSubjectStudentCount(s.id)} enrolled</span>
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button class="btn btn-ghost btn-sm" onclick="startEditSubject('${s.id}')">&#x270F; Edit</button>
+          <button class="btn-icon" onclick="deleteSubject('${s.id}')">&#x2715;</button>
+        </div>
+      </div>
+      <div id="subj-edit-${s.id}" class="subj-edit-row" style="display:none;flex-direction:column;gap:8px">
+        <div class="field"><label>Subject Name</label><input id="subj-edit-name-${s.id}" onkeydown="if(event.key==='Enter')saveEditSubject('${s.id}');if(event.key==='Escape')cancelEditSubject('${s.id}')"/></div>
+        <div style="display:flex;gap:7px;justify-content:flex-end;margin-top:2px">
+          <button class="btn btn-ghost btn-sm" onclick="cancelEditSubject('${s.id}')">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="saveEditSubject('${s.id}')">Save</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TEST SCORES
+// ═══════════════════════════════════════════════════════════════
+function populateScoreFilters(){
+  const fc=document.getElementById('score-filter-class');
+  const fs=document.getElementById('score-filter-subject');
+  const cur_c=fc.value,cur_s=fs.value;
+  fc.innerHTML='<option value="all">All Classes</option>'+classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  fs.innerHTML='<option value="all">All Subjects</option>'+subjects.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  if(cur_c)fc.value=cur_c;if(cur_s)fs.value=cur_s;
+  if(!document.getElementById('score-filter-month').value){
+    const now=new Date();
+    document.getElementById('score-filter-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
+}
+
+function renderScoresTable(){
+  const fc=document.getElementById('score-filter-class').value;
+  const fs=document.getElementById('score-filter-subject').value;
+  const fm=document.getElementById('score-filter-month').value;
+
+  const filtStudents=students.filter(s=>{
+    if(fc!=='all'&&!(s.enrollments||[]).some(e=>e.classId===fc))return false;
+    if(fs!=='all'&&!(s.enrollments||[]).some(e=>e.subjectId===fs))return false;
+    return true;
+  });
+  const dispSubjects=fs!=='all'?subjects.filter(s=>s.id===fs):subjects;
+
+  const thead=document.getElementById('scores-thead');
+  const tbody=document.getElementById('scores-tbody');
+  thead.innerHTML=`<tr><th>Student</th>${dispSubjects.map(s=>`<th class="td-center">${s.name}</th>`).join('')}</tr>`;
+
+  if(!filtStudents.length){tbody.innerHTML=`<tr><td colspan="${dispSubjects.length+1}" class="empty">No students match filters.</td></tr>`;return;}
+  tbody.innerHTML=filtStudents.map(s=>{
+    const cells=dispSubjects.map(sub=>{
+      const enrolled=(s.enrollments||[]).some(e=>e.subjectId===sub.id);
+      if(!enrolled)return`<td class="td-center score-none">—</td>`;
+      const sc=scores.find(x=>x.studentId===s.id&&x.subjectId===sub.id&&x.month===fm);
+      if(!sc)return`<td class="td-center score-none">—</td>`;
+      const pct=sc.total>0?sc.scored/sc.total:0;
+      const cls=pct>=0.75?'score-good':pct>=0.5?'score-mid':'score-low';
+      return`<td class="td-center"><span class="${cls}">${sc.scored}/${sc.total}</span></td>`;
+    }).join('');
+    return`<tr><td><div style="display:flex;align-items:center;gap:8px"><div class="avatar" style="width:26px;height:26px;font-size:11px">${(s.name||'?').charAt(0).toUpperCase()}</div>${s.name}</div></td>${cells}</tr>`;
+  }).join('');
+}
+
+// Score entry modal
+function openScoreModal(){
+  const sm=document.getElementById('sm-class');
+  const ss=document.getElementById('sm-subject');
+  sm.innerHTML='<option value="all">All Classes</option>'+classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  ss.innerHTML=subjects.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  const now=new Date();
+  document.getElementById('sm-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  refreshScoreModal();
+  document.getElementById('score-modal').style.display='flex';
+}
+function closeScoreModal(){document.getElementById('score-modal').style.display='none';}
+
+function refreshScoreModal(){
+  const fc=document.getElementById('sm-class').value;
+  const fs=document.getElementById('sm-subject').value;
+  const fm=document.getElementById('sm-month').value;
+  const filtStudents=students.filter(s=>{
+    if(fc!=='all'&&!(s.enrollments||[]).some(e=>e.classId===fc))return false;
+    if(fs&&!(s.enrollments||[]).some(e=>e.subjectId===fs))return false;
+    return true;
+  });
+  const el=document.getElementById('sm-rows');
+  if(!filtStudents.length){el.innerHTML='<p class="empty">No enrolled students found.</p>';return;}
+  el.innerHTML=filtStudents.map(s=>{
+    const ex=scores.find(x=>x.studentId===s.id&&x.subjectId===fs&&x.month===fm);
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-weight:500;font-size:13px">${s.name}</span>
+      <input type="number" placeholder="Score" value="${ex?.scored??''}" min="0" data-sid="${s.id}" data-field="scored" style="width:75px"/>
+      <span style="color:var(--text-dim)">/</span>
+      <input type="number" placeholder="Total" value="${ex?.total??100}" min="1" data-sid="${s.id}" data-field="total" style="width:75px"/>
+    </div>`;
+  }).join('');
+}
+
+async function saveScores(){
+  const fs=document.getElementById('sm-subject').value;
+  const fm=document.getElementById('sm-month').value;
+  const rows=document.querySelectorAll('#sm-rows [data-field="scored"]');
+  rows.forEach(inp=>{
+    const sid=inp.dataset.sid;
+    const totalInp=document.querySelector(`#sm-rows [data-sid="${sid}"][data-field="total"]`);
+    const scored=inp.value;const total=totalInp?.value||100;
+    if(scored==='')return;
+    const idx=scores.findIndex(x=>x.studentId===sid&&x.subjectId===fs&&x.month===fm);
+    const entry={id:uid(),studentId:sid,subjectId:fs,month:fm,scored:Number(scored),total:Number(total)};
+    if(idx>=0)scores[idx]={...scores[idx],...entry};else scores.push(entry);
+  });
+  showLoading('Saving…');await persist();hideLoading();closeScoreModal();renderScoresTable();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAYMENTS — Class → Student rows, Jan–Dec columns
+// ═══════════════════════════════════════════════════════════════
+function populatePayFilters(){
+  const fc=document.getElementById('pay-filter-class');
+  const fs=document.getElementById('pay-filter-subject');
+  const cc=fc.value,cs=fs.value;
+  fc.innerHTML='<option value="">— Select Class —</option>'+classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  fs.innerHTML='<option value="">— Select Subject —</option>'+subjects.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  if(cc)fc.value=cc;if(cs)fs.value=cs;
+}
+
+function renderPaymentTable(){
+  const fc=document.getElementById('pay-filter-class').value;
+  const fs=document.getElementById('pay-filter-subject').value;
+  const thead=document.getElementById('pay-thead');
+  const tbody=document.getElementById('pay-tbody');
+  const sumEl=document.getElementById('pay-summary');
+
+  if(!fc||!fs){
+    thead.innerHTML='';
+    tbody.innerHTML=`<tr><td colspan="13" class="empty" style="padding:40px">Please select a class and subject above to view payments.</td></tr>`;
+    sumEl.innerHTML='';
+    return;
+  }
+
+  // Students enrolled in this class+subject
+  const filtStudents=students.filter(s=>
+    (s.enrollments||[]).some(e=>e.classId===fc&&e.subjectId===fs)
+  );
+
+  // Header
+  thead.innerHTML=`<tr>
+    <th class="student-col">Student</th>
+    ${MONTHS_FULL.map((m,i)=>`<th>${m.slice(0,3)}</th>`).join('')}
+  </tr>`;
+
+  if(!filtStudents.length){
+    tbody.innerHTML=`<tr><td colspan="13" class="empty">No students enrolled in this class + subject combination.</td></tr>`;
+    sumEl.innerHTML='';
+    return;
+  }
+
+  // Summary counts
+  let paidTotal=0,totalCells=filtStudents.length*12;
+  tbody.innerHTML=filtStudents.map(s=>{
+    const cells=MONTHS_FULL.map((m,i)=>{
+      const monthNum=i+1;
+      const p=payments.find(x=>x.studentId===s.id&&x.subjectId===fs&&x.month===monthNum&&x.year===YEAR);
+      const paid=p?.paid||false;
+      if(paid)paidTotal++;
+      return`<td class="td-center">
+        <div class="tick-wrap">
+          <div class="tick-box${paid?' paid':''}" onclick="togglePayment('${s.id}','${fs}',${monthNum})" title="${paid?'Paid — click to mark unpaid':'Unpaid — click to mark paid'}"></div>
+        </div>
+      </td>`;
+    }).join('');
+    return`<tr><td class="student-name">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar" style="width:26px;height:26px;font-size:11px">${(s.name||'?').charAt(0).toUpperCase()}</div>
+        ${s.name}
+      </div>
+    </td>${cells}</tr>`;
+  }).join('');
+
+  const unpaidTotal=totalCells-paidTotal;
+  sumEl.innerHTML=`
+    <span class="badge badge-success">✓ Paid: ${paidTotal}</span>
+    <span class="badge badge-danger">✗ Unpaid: ${unpaidTotal}</span>
+    <span class="badge badge-muted">Students: ${filtStudents.length}</span>
+  `;
+}
+
+async function togglePayment(studentId,subjectId,month){
+  const idx=payments.findIndex(p=>p.studentId===studentId&&p.subjectId===subjectId&&p.month===month&&p.year===YEAR);
+  if(idx>=0){
+    payments[idx]={...payments[idx],paid:!payments[idx].paid,paidDate:!payments[idx].paid?new Date().toISOString().slice(0,10):null};
+  } else {
+    payments.push({id:uid(),studentId,subjectId,month,year:YEAR,paid:true,paidDate:new Date().toISOString().slice(0,10)});
+  }
+  showLoading('Saving…');await persist();hideLoading();renderPaymentTable();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+loadAllData();
+</script>
+</body>
+</html>
